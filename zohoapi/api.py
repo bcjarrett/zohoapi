@@ -21,9 +21,8 @@ class _BaseConnection:
     """
     This is an abstract class that ensures all of our api calls are made using
     the same method: _call_zoho()
-        _call_zoho() is our meat and potatoes so to speak, it is the only method
-        that ever really does anything. It's setup to accept a method and parameters,
-        which are generally defined in less abstract methods
+        _call_zoho() is the only method that makes requests. It's setup to accept a
+        method and parameters, which are generally defined in less abstract methods
 
     It also handles our sessions, if we have one already it passes it along
     otherwise it'll create one the first time you init a new ZohoConnection()
@@ -172,9 +171,8 @@ class _RecordMethods(_BaseConnection):
         _resp = self._call_zoho('POST', **params)
         return _resp
 
-    # This is a weird one. if we start with a lead and we want campaigns
+    # If we start with a lead and we want campaigns
     # we actually have to make the request through the campaigns module
-    # this is a kind of hackey workaround. I think Zoho built it backwards
     def related_records(self, record_id, parent_module, **params):
         _resp = None
         self.data_format = 'json'
@@ -196,12 +194,10 @@ class _RecordMethods(_BaseConnection):
 
 class _ModuleMethods(_RecordMethods):
     """
-    This abstract class contains methods that can only be called on plain
-    old modules, never on records
+    This abstract class contains methods that can only be called modules, never on records
 
-    _return_records() is an ugly, ugly function that fixes the really stupid
-    way zoho returns data if there is only one record. All records are returned
-    as part of a list
+    _return_records() fixes the way zoho returns data if there is only one record. 
+    All records are returned as part of a list
     """
 
     def _extend_record(self, params):
@@ -237,9 +233,7 @@ class _ModuleMethods(_RecordMethods):
         self.method = 'getRecords'
 
         """
-        Since Zoho is nice enough not to supply us with a 'next' or 'link' in
-        their response header we get to hand roll a pagination system that only
-        asks for 200 records at a time
+        We hand roll a pagination system that only asks for 200 records at a time
         """
         if 'recordCount' in params:
             return self._loop_records(params)
@@ -353,16 +347,8 @@ class _SingleRecord(_RecordMethods):
 
 class ZohoConnection(_BaseConnection):
     """
-    This is a fun little thing we do, below we redefine __getattr__
-    so that something like ZohoConnection().Contacts will create a
+    Redefine __getattr__ so that ZohoConnection().Contacts will create a
     connection to the 'Contacts' Module
-
-    The alternative is either writing dummy classes for everything - e.g.
-    Contacts(), Accounts() etc
-
-    Or having to call something like ZohoConnection().ZohoModule('Contacts')
-
-    I'm pretty pleased with the current implementation
 
     ***
 
@@ -371,8 +357,8 @@ class ZohoConnection(_BaseConnection):
 
     >>> zc = ZohoConnection()
     >>> first_two_hundred_contacts = zc.Contacts.get_records()
-    >>> zc.Accounts.insert_record({'First Name': 'Ben',
-    ...                            'Last Name': 'Jarrett'})
+    >>> zc.Accounts.insert_record({'First Name': 'Richard',
+    ...                            'Last Name': 'Johnson'})
 
     """
     def __getattr__(self, module):
