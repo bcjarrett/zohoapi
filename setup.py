@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='zohoapi',
     packages=['zohoapi'],
-    version='0.11',
+    version='1.1',
     description='Wrapper for the Zoho CRM API',
     author='Ben Jarrett',
     author_email='',
