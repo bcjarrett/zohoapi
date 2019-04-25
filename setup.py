@@ -7,7 +7,7 @@ setup(
     description='Wrapper for the Zoho CRM API',
     author='Ben Jarrett',
     author_email='',
-    url='https://bitbucket.org/cannibalsock/zohoapi',
+    url='https://github.com/bcjarrett/zohoapi',
     keywords='zoho crm',
     license='MIT',
     classifiers=[

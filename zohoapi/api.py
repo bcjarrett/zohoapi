@@ -1,9 +1,11 @@
-import requests
 import time
-from zohoapi import config
-from zohoapi.errors import (ZohoGeneralError, ZohoBadRecordError,
-                            ZohoConnectionError, ZohoNoDataError)
 from xml.etree import ElementTree
+
+import requests
+
+from . import config
+from .errors import (ZohoGeneralError, ZohoBadRecordError,
+                     ZohoConnectionError, ZohoNoDataError)
 
 """
 Because of the way modules and module id's are named, all custom modules must be mapped in
@@ -12,8 +14,9 @@ in this dictionary
 'Id' for 'CustomModule3' is 'CUSTOMMODULE3_ID'
 Note the difference in plurals as well as the underscore inconsistency
 """
+
 custom_module_mapping = {
-    'TradeShows': 'CustomModule3',
+    # 'TradeShows': 'CustomModule3',
 }
 
 
@@ -29,6 +32,7 @@ class _BaseConnection:
 
     We also house some helper functions here to help with formatting etc.
     """
+
     def __init__(self, session=None):
         self.base_url = 'https://crm.zoho.com/crm/private/'
         self.data_format = ''
@@ -94,8 +98,8 @@ class _BaseConnection:
             for row in ElementTree.fromstring(result.content)[0].findall('row'):
                 if row.find('error'):
                     _content = "Row: {} Code: {} Details: {}".format(row.attrib['no'],
-                                                                        row.find('error')[0].text,
-                                                                        row.find('error')[1].text)
+                                                                     row.find('error')[0].text,
+                                                                     row.find('error')[1].text)
                     errors.append(_content)
             return errors if errors else [i[0].text for i in
                                           ElementTree.fromstring(result.content).find('result').findall('recorddetail')]
@@ -140,9 +144,9 @@ class _RecordMethods(_BaseConnection):
     >>> zc.Contacts.delete_record(100201947456)
     >>> zc.Account.update_record(101020654321, {'Account Name': 'Test Account'})
 
-    They're subclasses in the _SingleRecord class and the id is automatically
-    supplied
+    They're subclasses in the _SingleRecord class and the id is automatically supplied
     """
+
     def __init__(self, module, session):
         super().__init__(session=session)
         self.module = module
@@ -196,7 +200,7 @@ class _ModuleMethods(_RecordMethods):
     """
     This abstract class contains methods that can only be called modules, never on records
 
-    _return_records() fixes the way zoho returns data if there is only one record. 
+    _return_records() fixes the way zoho returns data if there is only one record.
     All records are returned as part of a list
     """
 
@@ -292,7 +296,7 @@ class _ModuleMethods(_RecordMethods):
 
         if len(content_val_dict_list) > 100:
             params['version'] = 4
-            list_of_lists = [content_val_dict_list[x:x+100] for x in range(0, len(content_val_dict_list), 100)]
+            list_of_lists = [content_val_dict_list[x: x + 100] for x in range(0, len(content_val_dict_list), 100)]
             _resp = ''
             for mini_list in list_of_lists:
                 _resp += str(self.insert(mini_list, **params))
@@ -320,7 +324,15 @@ class _SingleRecord(_RecordMethods):
         return self.__str__()
 
     def __getitem__(self, item):
-        return self.value(item)
+        if item != 'Product Details':
+            return self.value(item)
+        else:
+            for i in self._content_dict:
+                if i['val'] == 'Product Details':
+                    return i['product'] if type(i['product']) == list else [i['product']]
+
+    def get(self, item, *default):
+        return self.__getitem__(item)
 
     @property
     def all_values(self):
@@ -361,6 +373,7 @@ class ZohoConnection(_BaseConnection):
     ...                            'Last Name': 'Johnson'})
 
     """
+
     def __getattr__(self, module):
         if module in custom_module_mapping:
             return _ModuleMethods(module=custom_module_mapping[module], session=self.session)
