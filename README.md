@@ -11,5 +11,5 @@ Example Usage:
     >>> from zohoapi.api import ZohoConnection
     >>> zc = ZohoConnection()
     >>> first_two_hundred_contacts = zc.Contacts.get_records()
-    >>> zc.Accounts.insert_record({'First Name': 'Richard',
-    ...                            'Last Name': 'Johnson'})
+    >>> zc.Accounts.insert_record({'First Name': 'John',
+    ...                            'Last Name': 'Doe'})
